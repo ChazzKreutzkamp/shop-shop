@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from '@apollo/react-hooks';
-import store from '../utils/store'
+import { useDispatch, useSelector } from 'react-redux';
 import { UPDATE_PRODUCTS, REMOVE_FROM_CART, UPDATE_CART_QUANTITY, ADD_TO_CART } from "../utils/actions";
 import { QUERY_PRODUCTS } from "../utils/queries";
 import spinner from '../assets/spinner.gif'
@@ -9,7 +9,10 @@ import Cart from '../components/Cart';
 import { idbPromise } from "../utils/helpers";
 
 function Detail() {
-  const state = store.getState();
+  const state = useSelector(state => state);
+
+  const dispatch = useDispatch();
+
   const { id } = useParams();
 
   const [currentProduct, setCurrentProduct] = useState({})
@@ -23,7 +26,7 @@ function Detail() {
       setCurrentProduct(products.find(product => product._id === id));
     }
     else if (data) {
-      store.dispatch({
+      dispatch({
         type: UPDATE_PRODUCTS,
         products: data.products
       });
@@ -33,19 +36,19 @@ function Detail() {
     }
     else if (!loading) {
       idbPromise('products', 'get').then((indexedProducts) => {
-        store.dispatch({
+        dispatch({
           type: UPDATE_PRODUCTS,
           products: indexedProducts
         });
       });
     }
-  }, [products, data, loading, id, store]);
+  }, [products, data, loading, dispatch, id]);
 
   const addToCart = () => {
     const itemInCart = cart.find((cartItem) => cartItem._id === id);
 
     if (itemInCart) {
-      store.dispatch({
+      dispatch({
         type: UPDATE_CART_QUANTITY,
         _id: id,
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
@@ -55,7 +58,7 @@ function Detail() {
         purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
       });
     } else {
-      store.dispatch({
+      dispatch({
         type: ADD_TO_CART,
         product: { ...currentProduct, purchaseQuantity: 1 }
       });
@@ -63,7 +66,7 @@ function Detail() {
     }
   };
   const removeFromCart = () => {
-    store.dispatch({
+    dispatch({
       type: REMOVE_FROM_CART,
       _id: currentProduct._id
     });

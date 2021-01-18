@@ -1,14 +1,14 @@
 import React, { useEffect, UseEffect } from "react";
 import { useQuery } from '@apollo/react-hooks';
 import { QUERY_CATEGORIES } from "../../utils/queries";
-import { useStoreContext } from "../../utils/GlobalState";
+import store from '../../utils/store';
 import { UPDATE_CATEGORIES, UPDATE_CURRENT_CATEGORY, UPDATE_PRODUCTS } from '../../utils/actions';
 import { idbPromise } from '../../utils/helpers';
 
 function CategoryMenu() {
   // const { data: categoryData } = useQuery(QUERY_CATEGORIES);
   // const categories = categoryData?.categories || [];
-  const [state, dispatch] = useStoreContext();
+  const state = store.getState();
 
   const { categories } = state;
 
@@ -16,7 +16,7 @@ function CategoryMenu() {
 
   useEffect(() => {
     if (categoryData) {
-      dispatch({
+      store.dispatch({
         type: UPDATE_CATEGORIES,
         categories: categoryData.categories
       });
@@ -26,15 +26,15 @@ function CategoryMenu() {
     }
     else if (!loading) {
       idbPromise('categories', 'get').then(categories => {
-        dispatch({
+        store.dispatch({
           type: UPDATE_CATEGORIES,
           categories: categories
         });
       });
     }
-  }, [categoryData, dispatch]);
+  }, [categoryData, store]);
   const handleClick = id => {
-    dispatch({
+    store.dispatch({
       type: UPDATE_CURRENT_CATEGORY,
       currentCategory: id
     });

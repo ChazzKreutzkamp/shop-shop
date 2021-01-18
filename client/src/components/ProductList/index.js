@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useQuery } from '@apollo/react-hooks';
-import { useStoreContext } from '../../utils/GlobalState';
+import store from '../../utils/store'
 import { UPDATE_PRODUCTS } from '../../utils/actions';
 import ProductItem from "../ProductItem";
 import { QUERY_PRODUCTS } from "../../utils/queries";
@@ -8,7 +8,7 @@ import spinner from "../../assets/spinner.gif";
 import { idbPromise } from "../../utils/helpers";
 
 function ProductList() {
-  const [state, dispatch] = useStoreContext();
+  const state = store.getState();
 
   const { currentCategory } = state;
   
@@ -16,7 +16,7 @@ function ProductList() {
   
   useEffect(() => {
     if (data) {
-      dispatch({
+      store.dispatch({
         type: UPDATE_PRODUCTS,
         products: data.products
       });
@@ -26,13 +26,13 @@ function ProductList() {
     }
     else if (!loading) {
       idbPromise('products', 'get').then((products) => {
-        dispatch({
+        store.dispatch({
           type: UPDATE_PRODUCTS,
           products: products
         });
       });
     }
-  }, [data, loading, dispatch]);
+  }, [data, loading, store]);
   
   function filterProducts() {
     if (!currentCategory) {
